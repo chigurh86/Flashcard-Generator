@@ -20,6 +20,7 @@ newClozecard.addOne("There was originally ... colonies", "13", "There was origin
 newClozecard.addOne("... was a Republican President who was impeached from office", "Richard Nixon", "President Nixon was a Republican President who was impeached from office");
 
 var startGame = function(){
+	console.log("You ran start game");
 		count = 0;
 		correct = 0;
 		incorrect = 0;
@@ -115,14 +116,15 @@ var askBasicQuestion = function(){
 		        message: "Play Again?",
 		    }, 
 		    ]).then(function(answers) {
-		    	if (answers.name === "Yes" || "yes") {
+		    	if (answers.name === "Yes") {
+		    		console.log(answers.name);
 		    		count = 0;
 		    		correct = 0;
 		    		incorrect = 0;
 		    		askBasicQuestion();
 
 		    	}
-		    	else{
+		    	else if(answers.name === "No"){
 					startGame();
 		    	}	
 	    	   });
@@ -140,6 +142,8 @@ switch(type){
     case "Partial-Card": 
 	askClozeQuestion();
     break;
+    default: 
+    console.log("I did not understand your command");
 }
 
 
