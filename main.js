@@ -7,15 +7,9 @@ var incorrect = 0;
 var type = process.argv[2];
 var createcount = 0;
 var newBasicCard = new BasicCard();
-newBasicCard.addCard("Who was the first US President?", "George Washington");
-
-
 var newClozecard = new ClozeCard();
-newClozecard.addOne("... was our first President", "George Washington", "George Washington was our first President");
-
 
 var startGame = function(){
-	console.log("You ran start game");
 		count = 0;
 		correct = 0;
 		incorrect = 0;
@@ -31,9 +25,8 @@ var askClozeQuestion = function(){
 		      }, 
 		    ]).then(function(answers) {
 			        if (answers.name.toLowerCase() === newClozecard.Clozecardarray[count].cloze) {
-			        	console.log("correct!");
+			        	console.log("Correct! " + newClozecard.Clozecardarray[count].full);
 			        	correct++;
-			        	
 			        }
 			        else{
 			        	console.log("Incorrect!");
@@ -44,13 +37,13 @@ var askClozeQuestion = function(){
 		 	 });
 	    }
 	    else{
-	    	console.log("Game Over!");
 	    	if (correct > incorrect) {
 	    		console.log("You Won!");
 	    	}
 	    	else{
 		    	console.log("You Lost!");
 		    }
+		    console.log("Game Over!");
 // ask to play again
 		    inquirer.prompt([
 		    {
@@ -59,10 +52,8 @@ var askClozeQuestion = function(){
 		    }, 
 		    ]).then(function(answers) {
 		    	if (answers.name.toLowerCase() === "yes") {
-		    		count = 0;
-		    		correct = 0;
-		    		incorrect = 0;
-		    		askClozeQuestion();
+		    		startGame();
+		    		createPartialCard();
 
 		    	}
 	    	   });
@@ -96,13 +87,13 @@ var askBasicQuestion = function(){
 		 	 });
 	    }
 	    else{
-	    	console.log("Game Over!");
 	    	if (correct > incorrect) {
 	    		console.log("You Won!");
 	    	}
 	    	else{
 		    	console.log("You Lost!");
 		    }
+		    console.log("Game Over!");
 // ask to play again
 		    inquirer.prompt([
 		    {
@@ -111,12 +102,8 @@ var askBasicQuestion = function(){
 		    }, 
 		    ]).then(function(answers) {
 		    	if (answers.name.toLowerCase() === "yes") {
-		    		// console.log(answers.name);
-		    		// count = 0;
-		    		// correct = 0;
-		    		// incorrect = 0;
 		    		startGame();
-		    		askBasicQuestion();
+		    		createNewCard();
 
 		    	}
 		    	else if(answers.name.toLowerCase() === "no"){
@@ -149,14 +136,12 @@ var createNewCard = function() {
 	        cards.front.toLowerCase(),
 	        cards.answer.toLowerCase())
 	      newBasicCard.BasicCardArray.push(newCard);
-	      // console.log(JSON.stringify(newBasicCard.BasicCardArray));
-	      createcount++;
 	      createNewCard();
 	    });
     }
   	else {
-    	console.log("Now lets Play!");
-   	 askBasicQuestion();
+    	console.log("Okay, lets Study!");
+   	 	askBasicQuestion();
   	}
   		});
 }
@@ -173,7 +158,7 @@ var createPartialCard = function() {
 	    inquirer.prompt([
 	      {
 	        name: "partial",
-	        message: "Type your question (use 3 dots for missing words)."
+	        message: "Type your question (use ... for the missing word or words)."
 	      }, {
 	        name: "answer",
 	        message: "Type the missing word"
@@ -181,16 +166,16 @@ var createPartialCard = function() {
 	    ]).then(function(cards) {
 	      var newPartialCard = new ClozeCard(
 	        cards.partial.toLowerCase(),
-	        cards.answer.toLowerCase()
+	        cards.answer.toLowerCase(),
+	        cards.partial.toLowerCase().replace("...", cards.answer)
 	        )
 	      newClozecard.Clozecardarray.push(newPartialCard);
-	      console.log(JSON.stringify(newClozecard.Clozecardarray));
-	      createcount++;
+	      // console.log(JSON.stringify(newClozecard.Clozecardarray));
 	      createPartialCard();
 	    });
     }
      else {
-    	console.log("Now lets Play!");
+    	console.log("Okay, lets Study!");
     	askClozeQuestion();
   	 }
   });
@@ -204,12 +189,6 @@ switch(type){
 	case "Create-Partial":
 	createPartialCard();
 	break;
-	case "Basic-Card": 
-	askBasicQuestion();
-    break;
-    case "Partial-Card": 
-	askClozeQuestion();
-    break;
     default: 
     console.log("I did not understand your command");
 }
