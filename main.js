@@ -5,19 +5,14 @@ var count = 0;
 var correct = 0;
 var incorrect = 0;
 var type = process.argv[2];
-
+var createcount = 0;
 var newBasicCard = new BasicCard();
 newBasicCard.addCard("Who was the first US President?", "George Washington");
-newBasicCard.addCard("What political party was a Bill Clinton affiliated with?", "Democratic");
-newBasicCard.addCard("How many original colonies were there in the United States?","13");
-newBasicCard.addCard("Was President Nixon impeached from office?", "Yes");
 
 
 var newClozecard = new ClozeCard();
 newClozecard.addOne("... was our first President", "George Washington", "George Washington was our first President");
-newClozecard.addOne("... was a Democratic President who got impeached", "Bill Clinton", "Bill Clinton was a Democratic President who got impeached");
-newClozecard.addOne("There was originally ... colonies", "13", "There was originally 13 colonies");
-newClozecard.addOne("... was a Republican President who was impeached from office", "Richard Nixon", "President Nixon was a Republican President who was impeached from office");
+
 
 var startGame = function(){
 	console.log("You ran start game");
@@ -35,9 +30,8 @@ var askClozeQuestion = function(){
 		        message: newClozecard.Clozecardarray[count].partial,
 		      }, 
 		    ]).then(function(answers) {
-			        if (answers.name === newClozecard.Clozecardarray[count].cloze) {
+			        if (answers.name.toLowerCase() === newClozecard.Clozecardarray[count].cloze) {
 			        	console.log("correct!");
-			        	console.log(newClozecard.Clozecardarray[count].full)
 			        	correct++;
 			        	
 			        }
@@ -64,7 +58,7 @@ var askClozeQuestion = function(){
 		        message: "Play Again?",
 		    }, 
 		    ]).then(function(answers) {
-		    	if (answers.name === "Yes" || "yes") {
+		    	if (answers.name.toLowerCase() === "yes") {
 		    		count = 0;
 		    		correct = 0;
 		    		incorrect = 0;
@@ -87,7 +81,7 @@ var askBasicQuestion = function(){
 		        message: newBasicCard.BasicCardArray[count].front,
 		      }, 
 		    ]).then(function(answers) {
-		        if (answers.name === newBasicCard.BasicCardArray[count].back) {
+		        if (answers.name.toLowerCase() === newBasicCard.BasicCardArray[count].back) {
 		        	console.log("correct!");
 		        	correct++;
 		        	count++;
@@ -116,15 +110,16 @@ var askBasicQuestion = function(){
 		        message: "Play Again?",
 		    }, 
 		    ]).then(function(answers) {
-		    	if (answers.name === "Yes") {
-		    		console.log(answers.name);
-		    		count = 0;
-		    		correct = 0;
-		    		incorrect = 0;
+		    	if (answers.name.toLowerCase() === "yes") {
+		    		// console.log(answers.name);
+		    		// count = 0;
+		    		// correct = 0;
+		    		// incorrect = 0;
+		    		startGame();
 		    		askBasicQuestion();
 
 		    	}
-		    	else if(answers.name === "No"){
+		    	else if(answers.name.toLowerCase() === "no"){
 					startGame();
 		    	}	
 	    	   });
@@ -133,9 +128,82 @@ var askBasicQuestion = function(){
 	}
 askQuestion();
 }
+var createNewCard = function() {
+	inquirer.prompt([
+	      {
+	        name: "makemore",
+	        message: "Want to make a card?"
+	      }, 
+	    ]).then(function(amounts){
+    if(amounts.makemore.toLowerCase() === "yes"){
+	    inquirer.prompt([
+	      {
+	        name: "front",
+	        message: "Type your question"
+	      }, {
+	        name: "answer",
+	        message: "Type the answer"
+	      }, 
+	    ]).then(function(cards) {
+	      var newCard = new BasicCard(
+	        cards.front.toLowerCase(),
+	        cards.answer.toLowerCase())
+	      newBasicCard.BasicCardArray.push(newCard);
+	      // console.log(JSON.stringify(newBasicCard.BasicCardArray));
+	      createcount++;
+	      createNewCard();
+	    });
+    }
+  	else {
+    	console.log("Now lets Play!");
+   	 askBasicQuestion();
+  	}
+  		});
+}
+
+var createPartialCard = function() {
+	inquirer.prompt([
+	      {
+	        name: "amount",
+	        message: "Want to make a card?"
+	      }, 
+	    ]).then(function(amounts){
+    if(amounts.amount.toLowerCase() === "yes"){
+    	console.log("Create a partial card: ");
+	    inquirer.prompt([
+	      {
+	        name: "partial",
+	        message: "Type your question (use 3 dots for missing words)."
+	      }, {
+	        name: "answer",
+	        message: "Type the missing word"
+	      }, 
+	    ]).then(function(cards) {
+	      var newPartialCard = new ClozeCard(
+	        cards.partial.toLowerCase(),
+	        cards.answer.toLowerCase()
+	        )
+	      newClozecard.Clozecardarray.push(newPartialCard);
+	      console.log(JSON.stringify(newClozecard.Clozecardarray));
+	      createcount++;
+	      createPartialCard();
+	    });
+    }
+     else {
+    	console.log("Now lets Play!");
+    	askClozeQuestion();
+  	 }
+  });
+}
 
 
 switch(type){
+	case "Create-Basic":
+	createNewCard();
+	break;
+	case "Create-Partial":
+	createPartialCard();
+	break;
 	case "Basic-Card": 
 	askBasicQuestion();
     break;
